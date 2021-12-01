@@ -34,17 +34,29 @@ class Session(requests.Session):
             return open("bigboy.txt")
         return open(self.fname,"r")
         
-    def check_solved(self,level):
-        if level == 1 and os.path.exists("silver.flag"):
-            return os.path.exists("silver.flag")
-        elif level == 2 and os.path.exists("gold.flag"):
-            return os.path.exists("gold.flag")
+    def check_solved(self,level,answer):
+        if level == 1:
+            if os.path.exists("silver.flag"):
+                expected = open("silver.flag","r").read()
+                if str(answer) == expected:
+                    print("Silver Solved! <matched silver.flag>",answer)
+                return True
+            return False
+        elif level == 2:
+            if os.path.exists("gold.flag"):
+                expected = open("gold.flag","r").read()
+                if str(answer) == expected:
+                    print("Gold Solved! <matched gold.flag>",answer)
+                return True
+            return False
         return False
 
     def make_flag(self,level,answer):
         if level == 1:
+            print("Silver solved!",answer)
             fp = open("silver.flag","w").write(str(answer))
         elif level == 2:
+            print("Gold solved!",answer)
             fp = open("gold.flag","w").write(str(answer))
 
 
@@ -55,10 +67,10 @@ class Session(requests.Session):
         elif level not in [1,2]:
             print(f"level must be either 1 (silver) or 2 (gold), instead got '{level}'")
             return
-        elif self.check_solved(level):
-            print(f"Level {level} is already solved.")
+        elif self.check_solved(level,answer):
             return
 
+        print(f"submitting... '{answer}'")
         r = self.post(f'{self.url}/answer', data={
             'level': level,
             'answer': answer
