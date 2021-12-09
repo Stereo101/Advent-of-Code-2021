@@ -2,7 +2,7 @@ from advent import Session
 
 aoc = Session(2021,3)
 
-with aoc.fp(BIGBOY=True) as f:
+with aoc.fp() as f:
     lines = [int(line.strip(),2) for line in f.readlines()]
 
 def mcb(arr,mask,lcb=False):

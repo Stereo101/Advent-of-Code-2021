@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 public class Program {
     public static int Main(string[] args) {
-        List<ulong> lines = (from string s in System.IO.File.ReadLines("bigboy.txt")
+        List<ulong> lines = (from string s in System.IO.File.ReadLines("day3.input")
             select Convert.ToUInt64(s,2)).ToList();
        
         ulong bitwidth = Program.get_bitwidth(lines);
@@ -21,11 +21,10 @@ public class Program {
         silver_comp = silver_comp << (int)bitwidth;
         silver_comp -= 1;
         silver *= silver_comp ^ silver;
-
         Console.WriteLine("Silver {0}",silver);
-        ulong gold = Program.filter_mcb(lines,bitwidth) * Program.filter_mcb(lines,bitwidth,lcb:true);
+
+        ulong gold = Program.filter_mcb(lines,bitwidth);
         Console.WriteLine("Gold {0}",gold);
-        
         return 0;
     }
 
@@ -39,18 +38,64 @@ public class Program {
         return (sum >= (ulong)(arr.Count()/2))^lcb ? mask : 0;
     }
 
-    private static ulong filter_mcb(List<ulong> arr,ulong bitwidth,bool lcb = false) {
-        ulong mask = 1;
-        mask <<= (int)(bitwidth-1);
-        ulong bit; 
-        while(arr.Count() > 1) {
-            bit = mcb(arr,mask,lcb:lcb); 
-            arr = (from ulong e in arr
-                where (e&mask) == bit
-                select e).ToList();
-            mask /= 2;
+    private static int partition(List<ulong> arr,int start,int end,ulong mask) {
+        int left_p = start;
+        int right_p = end; 
+        while(left_p < right_p) {
+            while(((arr[left_p]&mask) == 0) && (left_p < right_p)) {
+                left_p += 1;
+            }
+            while(((arr[right_p]&mask) != 0) && (left_p < right_p)) {
+                right_p -= 1;
+            } 
+
+            if(left_p < right_p) {
+                ulong temp = arr[left_p];        
+                arr[left_p] = arr[right_p];
+                arr[right_p] = temp;
+            }
         }
-        return arr[0];
+
+        //Adjust left_p back onto the last 0-element
+        if(left_p != start && (arr[left_p]&mask) != 0) {
+            left_p -= 1;
+        }
+        
+        return left_p;
+    }
+    private static ulong filter_mcb(List<ulong> arr,ulong bitwidth) {
+        ulong mask = 1UL << (int)(bitwidth-1);
+
+        int start = 0;
+        int end = arr.Count() - 1;
+        int first_part = Program.partition(arr,start,end,mask);
+        int part = first_part;
+
+        while(start != end) {
+            if(part > (end+start)/2) {
+                start = part+1;
+            } else {
+                end = part;
+            }
+            mask >>= 1;
+            part = Program.partition(arr,start,end,mask);
+        }
+        ulong p1 = arr[end];
+
+        part = first_part;
+        start = 0;
+        end = arr.Count()-1;
+        mask = 1UL << (int)(bitwidth-1);
+        while(start != end) {
+            if(part > (end+start)/2) {
+                end = part; 
+            } else {
+                start = part+1;
+            }
+            mask >>= 1; 
+            part = Program.partition(arr,start,end,mask);
+        }
+        return arr[end] * p1;
     }
 
     private static ulong get_bitwidth(List<ulong> arr) {
@@ -67,33 +112,3 @@ public class Program {
         return count;
     }
 }
-
-
-/*
-def mcb(arr,mask,lcb=False):
-    return mask if (sum(e&mask==mask for e in arr) >= len(arr)/2)^lcb else 0
-
-def filter_mcb(arr,bitwidth,lcb=False):
-    mask = 1 << (bitwidth-1) 
-    while len(arr) > 1:
-        bit = mcb(arr,mask,lcb)
-        arr = [e for e in arr if (e&mask) == bit]
-        mask >>= 1
-    return arr[0]
-
-def get_bitwidth(arr):
-    m = max(arr)
-    mask,result = 1,0
-    while mask < m:
-        mask <<= 1
-        result += 1
-    return result
-
-prlong(len(lines),"loaded")
-bitwidth = get_bitwidth(lines)
-silver = sum(mcb(lines,1 << i) for i in range(bitwidth))
-silver *= ((1 << (bitwidth))-1) ^ silver
-gold = filter_mcb(lines,bitwidth) * filter_mcb(lines,bitwidth,lcb=True)
-prlong(silver,gold)
-
-*/

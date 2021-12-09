@@ -40,6 +40,8 @@ class Session(requests.Session):
                 expected = open("silver.flag","r").read()
                 if str(answer) == expected:
                     print("Silver Solved! <matched silver.flag>",answer)
+                else:
+                    print(f"Silver didn't match flag. ans given:'{answer}' != flag:'{expected}'")
                 return True
             return False
         elif level == 2:
@@ -47,6 +49,8 @@ class Session(requests.Session):
                 expected = open("gold.flag","r").read()
                 if str(answer) == expected:
                     print("Gold Solved! <matched gold.flag>",answer)
+                else:
+                    print(f"Gold didn't match flag. ans given:'{answer}' != flag:'{expected}'")
                 return True
             return False
         return False
