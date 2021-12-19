@@ -7,6 +7,31 @@ import os
 AOC_SESSION = os.environ["AOC_SESSION"]
 
 
+def adj4(x,y,grid):
+    for dx,dy in ((0,1),(0,-1),(1,0),(-1,0)):
+        ex = dx+x
+        ey = dy+y
+        if ex >= 0 and ex < len(grid[0]) and ey >= 0 and ey < len(grid):
+            yield ex,ey
+
+def adj8(x,y,grid):
+    for dx,dy in ((-1,0),(1,0),(-1,1),(1,-1),(0,-1),(0,1),(-1,-1),(1,1)):
+        ex = dx+x
+        ey = dy+y
+        if ex >= 0 and ex < len(grid[0]) and ey >= 0 and ey < len(grid):
+            yield ex,ey
+
+def iterate2d(grid):
+    for y in range(len(grid)):
+        for x in range(len(grid[0])):
+            yield x,y
+
+def show2d(grid):
+    for y in range(len(grid)):
+        for x in range(len(grid[0])):
+            print(grid[y][x],end="")
+        print()
+    print()
 
 class Session(requests.Session):
     def __init__(self, year: int, day: int) -> None:
